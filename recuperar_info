@@ -1,0 +1,89 @@
+import com.github.gitlab4j.api.GitLabApi;
+import com.github.gitlab4j.api.GitLabApiException;
+import com.github.gitlab4j.api.models.MergeRequest;
+import com.github.gitlab4j.api.models.Project;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Random;
+
+public class GitLabJavaProject {
+    private static final String GITLAB_USERNAME = "<Your gitlab username>";
+    private static final String GITLAB_PERSONAL_ACCESS_TOKEN = "<Gitlab PAT>";
+    private static final int GITLAB_PROJECT_ID = 53433329;
+    private static final int GITLAB_MR_ASSIGNEE_ID = 8650933;
+    private static final String MAIN_BRANCH_NAME = "main";
+    private static final String GITLAB_REMOTE_REPO_URL = "https://gitlab.com/mayurengineer/example-java-project.git";
+    private static final String COMMIT_MSG = "Adding sum method";
+
+    public static void main(String[] args) throws IOException, GitAPIException, GitLabApiException {
+        // Generate Java code
+        String javaCode = generateJava();
+
+        // Clone repository and checkout a new branch
+        Git git = gitCloneRepositoryAndCheckoutBranch("feature/new-branch");
+
+        // Commit using JGit
+        gitCommit(git, javaCode);
+
+        // Create a merge request on GitLab using GitLab4j
+        createMergeRequest("feature/new-branch", MAIN_BRANCH_NAME, COMMIT_MSG, GITLAB_MR_ASSIGNEE_ID);
+    }
+
+    private static String generateJava() {
+        String className = "Main";
+        Builder builderClass = TypeSpec.classBuilder(className);
+        int a = new Random().nextInt(Integer.MAX_VALUE);
+        int b = new Random().nextInt(Integer.MAX_VALUE);
+        MethodSpec methodSpec = buildSumMethod(a, b);
+        builderClass.addMethod(methodSpec);
+        JavaFile.Builder javaFile = JavaFile.builder("com.example", builderClass.build());
+        return javaFile.build().toString();
+    }
+
+    private static MethodSpec buildSumMethod(int a, int b) {
+        // Build a method that returns the sum of a and b
+        return MethodSpec.methodBuilder("sum")
+               .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+               .returns(int.class)
+               .addParameter(int.class, "a")
+               .addParameter(int.class, "b")
+               .addStatement("return a + b")
+               .build();
+    }
+
+    private static Git gitCloneRepositoryAndCheckoutBranch(String branch) throws IOException, GitAPIException {
+        File dir = new File("project-dir");
+        if (dir.exists()) {
+            FileUtils.delete(dir, FileUtils.RECURSIVE);
+        }
+        Git git = Git.cloneRepository()
+               .setCredentialsProvider(new UsernamePasswordCredentialsProvider(GITLAB_USERNAME, GITLAB_PERSONAL_ACCESS_TOKEN))
+               .setURI(GITLAB_REMOTE_REPO_URL)
+               .setDirectory(dir)
+               .call();
+        git.branchCreate().setName(branch).call();
+        git.checkout().setName(branch).call();
+        return git;
+    }
+
+    private static void gitCommit(Git git, String javaCode) throws GitAPIException {
+        git.add().addFilepattern(".").call();
+        git.commit().setMessage(COMMIT_MSG).call();
+        git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(GITLAB_USERNAME, GITLAB_PERSONAL_ACCESS_TOKEN)).call();
+        git.getRepository().close();
+        System.out.println("Code commit was successful");
+    }
+
+    private static void createMergeRequest(String branch, String mainBranchName, String commitMsg, int assigneeId) throws GitLabApiException {
+        GitLabApi gitLabApi = new GitLabApi(GITLAB_REMOTE_REPO_URL, GITLAB_PERSONAL_ACCESS_TOKEN);
+        Project project = gitLabApi.getProject(GITLAB_PROJECT_ID);
+        MergeRequest mergeRequest = project.createMergeRequest(branch, mainBranchName, commitMsg, assigneeId);
+        System.out.println("Merge request created successfully");
+    }
+}
