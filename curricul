@@ -1,0 +1,40 @@
+const newDocument = {
+  company_id: 'tring',
+  required: true,
+  position_id: 'tring',
+  required: true,
+  candidate_id: 'tring',
+  required: true,
+  name: 'tring',
+  email_address: 'tring',
+  phone_number: 'tring',
+  summary: 'tring',
+  source: 'tring Breezy API',
+  tags: ['custom source to attribute to the incoming candidate'],
+  headline: 'tring',
+  address: 'tring',
+  social_profiles: {
+    facebook: 'tring',
+    linkedin: 'tring',
+    twitter: 'tring',
+    dribbble: 'tring',
+    instagram: 'tring',
+    behance: 'tring',
+    angellist: 'tring',
+    flickr: 'tring',
+    github: 'tring',
+    youtube: 'tring',
+    google_plus: 'tring',
+    skype: 'tring',
+    globe: 'tring'
+  },
+  cover_letter: 'tring'
+};
+
+await gitlab.projects.repository.files.create({
+  project_id: {id},
+  file_path: 'path/to/new/document.json',
+  branch: 'ain', // or the branch you want
+  content: JSON.stringify(newDocument),
+  commit_message: 'Add a new document for the candidate',
+});
