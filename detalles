@@ -1,0 +1,24 @@
+import requests
+ Retrieve details for a position with id 123
+response = requests.get(f"{base_url}/123")
+if response.status_code == 200:
+    position_data = response.json()
+    print(f"Position details: {position_data}")
+else:
+    print(f"Error retrieving position: {response.status_code}")
+
+# Update the state of a position with id 456
+data = {"state": "Completed"}
+response = requests.put(f"{base_url}/456", json=data)
+if response.status_code == 200:
+    print(f"Position state updated successfully.")
+else:
+    print(f"Error updating position state: {response.status_code}")
+
+# Create a new position
+data = {"name": "Software Engineer", "description": "Develop software applications."}
+response = requests.post(f"{base_url}", json=data)
+if response.status_code == 201:
+    print(f"New position created successfully.")
+else:
+    print(f"Error creating new position: {response.status_code}")
