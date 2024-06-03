@@ -1,0 +1,27 @@
+import requests
+
+
+api_url= "https://github.com/JosiazLopez/proyecto/blob/main/ramas"
+
+
+def create_candidate(name, email, phone_number, summary):
+    """Sends a POST request to create a new candidate."""
+    data = {
+        "name": name,
+        "email_address": email,
+        "phone_number": phone_number,
+        "summary": summary,
+        # Add other required parameters from the API
+    }
+
+    response = requests.post(f"{api_url}/candidates", json=data)
+
+    if response.status_code == 201:
+        print("Candidate created successfully!")
+        return response.json()  # Get the response data
+    else:
+        print(f"Error: {response.status_code}")
+        print(response.text)  # Print the error message
+
+
+create_candidate("Samuele", "s.doe@example.com", "123", "Experienced software developer")
