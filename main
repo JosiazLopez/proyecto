@@ -1,0 +1,172 @@
+const express = require('express');
+const router = express.Router();
+const candidatesController = require('../controllers/candidatesController');
+
+router.get('/:company_id/:position_id/:candidate_id', candidatesController.getCandidate);
+router.put('/:company_id/:position_id/:candidate_id', candidatesController.updateCandidate);
+router.get('/:company_id/:position_id/:candidate_id/documents', candidatesController.getDocuments);
+router.put('/:company_id/:position_id/:candidate_id/documents', candidatesController.updateDocuments);
+router.post('/:company_id/:position_id/:candidate_id/documents', candidatesController.addDocument);
+router.put('/:company_id/:position_id/:candidate_id/education', candidatesController.updateEducation);
+router.post('/:company_id/:position_id/:candidate_id/move', candidatesController.moveCandidate);
+router.get('/:company_id/:position_id/:candidate_id/questionnaire/:questionnaireId', candidatesController.getQuestionnaire);
+router.post('/:company_id/:position_id/:candidate_id/questionnaires', candidatesController.addQuestionnaire);
+router.post('/:company_id/:position_id/:candidate_id/resume', candidatesController.addResume);
+router.get('/:company_id/:position_id/:candidate_id/scorecard', candidatesController.getScorecard);
+router.post('/:company_id/:position_id/:candidate_id/send-questionnaire', candidatesController.sendQuestionnaire);
+router.put('/:company_id/:position_id/:candidate_id/stage', candidatesController.updateStage);
+
+module.exports = router;
+
+2. Actualización de controllers/candidatesController.js
+const fs = require('fs');
+const path = require('path');
+
+const dataPath = path.join(__dirname, '../data.json');
+
+const getData = () => {
+  const jsonData = fs.readFileSync(dataPath, 'utf-8');
+  return JSON.parse(jsonData);
+};
+
+const saveData = (data) => {
+  fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf-8');
+};
+
+exports.getCandidate = (req, res) => {
+  const { company_id, position_id, candidate_id } = req.params;
+  const data = getData();
+  const candidate = data.candidates.find(c => c.id === parseInt(candidate_id));
+  if (!candidate) return res.status(404).send('Candidate not found.');
+  res.send(candidate);
+};
+
+exports.updateCandidate = (req, res) => {
+  const { company_id, position_id, candidate_id } = req.params;
+  const data = getData();
+  const candidate = data.candidates.find(c => c.id === parseInt(candidate_id));
+  if (!candidate) return res.status(404).send('Candidate not found.');
+
+  // Actualiza los campos necesarios
+  Object.assign(candidate, req.body);
+
+  saveData(data);
+  res.send(candidate);
+};
+
+exports.getDocuments = (req, res) => {
+  const { company_id, position_id, candidate_id } = req.params;
+  const data = getData();
+  const candidate = data.candidates.find(c => c.id === parseInt(candidate_id));
+  if (!candidate) return res.status(404).send('Candidate not found.');
+
+  res.send(candidate.documents);
+};
+
+exports.updateDocuments = (req, res) => {
+  const { company_id, position_id, candidate_id } = req.params;
+  const data = getData();
+  const candidate = data.candidates.find(c => c.id === parseInt(candidate_id));
+  if (!candidate) return res.status(404).send('Candidate not found.');
+
+  candidate.documents = req.body.documents;
+  saveData(data);
+  res.send(candidate.documents);
+};
+
+exports.addDocument = (req, res) => {
+  const { company_id, position_id, candidate_id } = req.params;
+  const data = getData();
+  const candidate = data.candidates.find(c => c.id === parseInt(candidate_id));
+  if (!candidate) return res.status(404).send('Candidate not found.');
+
+  candidate.documents.push(req.body.document);
+  saveData(data);
+  res.send(candidate.documents);
+};
+
+exports.updateEducation = (req, res) => {
+  const { company_id, position_id, candidate_id } = req.params;
+  const data = getData();
+  const candidate = data.candidates.find(c => c.id === parseInt(candidate_id));
+  if (!candidate) return res.status(404).send('Candidate not found.');
+
+  candidate.education = req.body.education;
+  saveData(data);
+  res.send(candidate.education);
+};
+
+exports.moveCandidate = (req, res) => {
+  const { company_id, position_id, candidate_id } = req.params;
+  const data = getData();
+  const candidate = data.candidates.find(c => c.id === parseInt(candidate_id));
+  if (!candidate) return res.status(404).send('Candidate not found.');
+
+  candidate.location = req.body.location;
+  saveData(data);
+  res.send(candidate);
+};
+
+exports.getQuestionnaire = (req, res) => {
+  const { company_id, position_id, candidate_id, questionnaireId } = req.params;
+  const data = getData();
+  const candidate = data.candidates.find(c => c.id === parseInt(candidate_id));
+  if (!candidate) return res.status(404).send('Candidate not found.');
+
+  const questionnaire = candidate.questionnaires.find(q => q.id === parseInt(questionnaireId));
+  if (!questionnaire) return res.status(404).send('Questionnaire not found.');
+
+  res.send(questionnaire);
+};
+
+exports.addQuestionnaire = (req, res) => {
+  const { company_id, position_id, candidate_id } = req.params;
+  const data = getData();
+  const candidate = data.candidates.find(c => c.id === parseInt(candidate_id));
+  if (!candidate) return res.status(404).send('Candidate not found.');
+
+  candidate.questionnaires.push(req.body.questionnaire);
+  saveData(data);
+  res.send(candidate.questionnaires);
+};
+
+exports.addResume = (req, res) => {
+  const { company_id, position_id, candidate_id } = req.params;
+  const data = getData();
+  const candidate = data.candidates.find(c => c.id === parseInt(candidate_id));
+  if (!candidate) return res.status(404).send('Candidate not found.');
+
+  candidate.resume = req.body.resume;
+  saveData(data);
+  res.send(candidate.resume);
+};
+
+exports.getScorecard = (req, res) => {
+  const { company_id, position_id, candidate_id } = req.params;
+  const data = getData();
+  const candidate = data.candidates.find(c => c.id === parseInt(candidate_id));
+  if (!candidate) return res.status(404).send('Candidate not found.');
+
+  res.send(candidate.scorecard);
+};
+
+exports.sendQuestionnaire = (req, res) => {
+  const { company_id, position_id, candidate_id } = req.params;
+  const data = getData();
+  const candidate = data.candidates.find(c => c.id === parseInt(candidate_id));
+  if (!candidate) return res.status(404).send('Candidate not found.');
+
+  // Lógica para enviar el cuestionario
+  res.send(`Questionnaire sent to candidate ${candidate.id}`);
+};
+
+exports.updateStage = (req, res) => {
+  const { company_id, position_id, candidate_id } = req.params;
+  const data = getData();
+  const candidate = data.candidates.find(c => c.id === parseInt(candidate_id));
+  if (!candidate) return res.status(404).send('Candidate not found.');
+
+  candidate.stage = req.body.stage;
+  saveData(data);
+  res.send(candidate.stage);
+};
