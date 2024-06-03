@@ -1,6 +1,6 @@
 const { exec } = require('child_process');
 
-// Crear una rama para una característica
+
 exec('git branch feature/new-login-system', (error, stdout, stderr) => {
   if (error) {
     console.error(`exec error: ${error}`);
@@ -10,7 +10,7 @@ exec('git branch feature/new-login-system', (error, stdout, stderr) => {
   console.error(`stderr: ${stderr}`);
 });
 
-// Crear una rama para una versión
+
 exec('git branch release/v1.0', (error, stdout, stderr) => {
   if (error) {
     console.error(`exec error: ${error}`);
@@ -20,7 +20,7 @@ exec('git branch release/v1.0', (error, stdout, stderr) => {
   console.error(`stderr: ${stderr}`);
 });
 
-// Crear una rama para un parche de seguridad
+
 exec('git branch hotfix/fix-security-vulnerability', (error, stdout, stderr) => {
   if (error) {
     console.error(`exec error: ${error}`);
@@ -30,19 +30,18 @@ exec('git branch hotfix/fix-security-vulnerability', (error, stdout, stderr) => 
   console.error(`stderr: ${stderr}`);
 });
 Keypoints
-// Create a new branch
+
 git branch feature/new-feature
 
-// Switch to the new branch
+
 git checkout feature/new-feature
 
-// Make changes and commit
+
 git add.
 git commit -m "Added new feature"
 
-// Push the branch to GitLab
+
 git push origin feature/new-feature
 
-// Create a merge request in GitLab
-// Review and merge the branch into the main Branch
+
 
